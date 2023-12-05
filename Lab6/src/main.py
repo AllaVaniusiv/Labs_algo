@@ -1,30 +1,30 @@
 def boyer_moore_search(haystack, needle):
-    m, n = len(needle), len(haystack)
-    if m == 0 or n == 0 or m > n:
+    if not haystack or not needle:
         return []
+    
+    m, n = len(needle), len(haystack)
+
+    bad_char_shift = {char: m - index - 1 for index, char in enumerate(needle[:-1])}
+    bad_char_shift[needle[-1]] = m + 1 if needle[-1] not in needle[:-1] else 0
 
     indices = []
 
-    # Calculate bad character shift
-    bad_char_shift = {char: max(1, m - needle.rindex(char) - 1) for char in set(needle[:-1])}
-    bad_char_shift[needle[-1]] = max(1, m)
-
-    i = 0
-    while i <= n - m:
+    i = m - 1 
+    while i < n:
         j = m - 1
 
-        while j >= 0 and needle[j] == haystack[i + j]:
+        while j >= 0 and needle[j] == haystack[i]:
+            i -= 1
             j -= 1
 
-        if j < 0:
-            indices.append(i)
-            i += 1
-        else:
-            i += max(1, j - bad_char_shift.get(haystack[i + j], 0))
+        if j == -1:
+            indices.append(i + 1)
+        
+        i += max(bad_char_shift.get(haystack[i], m), m - j)
 
     return indices
 
-haystack = "ababcababcabcabc"
-needle = "abc"
+haystack = "ababagalamaga"
+needle = "lama"
 result = boyer_moore_search(haystack, needle)
 print(f"Indexes of '{needle}' in '{haystack}': {result}")
